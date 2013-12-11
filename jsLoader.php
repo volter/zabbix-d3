@@ -61,6 +61,7 @@ $availableJScripts = array(
 	'multiselect.js' => '',
 	// vendors
 	'prototype.js' => '',
+	'd3.js' => '',
 	'jquery.js' => 'jquery/',
 	'jquery-ui.js' => 'jquery/',
 	'activity-indicator.js' => 'vendors/',
