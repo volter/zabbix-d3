@@ -717,6 +717,8 @@ define('GRAPH_TYPE_COLUMN',			7);
 define('GRAPH_TYPE_BAR_STACKED',	8);
 define('GRAPH_TYPE_COLUMN_STACKED',	9);
 
+define('GRAPH_ENGINE_D3', true);
+
 define('GRAPH_3D_ANGLE', 70);
 
 define('GRAPH_STACKED_ALFA', 15); // 0..100 transparency

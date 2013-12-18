@@ -18,11 +18,17 @@
 ** Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 **/
 
-
 require_once dirname(__FILE__).'/include/config.inc.php';
 
 $page['file'] = 'chart.php';
-$page['type'] = PAGE_TYPE_IMAGE;
+
+if(GRAPH_ENGINE_D3 === true){
+	$page['type'] = PAGE_TYPE_HTML;
+	$page['scripts'] = array('class.graphd3.js', 'd3.js');
+}
+else{
+	$page['type'] = PAGE_TYPE_IMAGE;
+}
 
 require_once dirname(__FILE__).'/include/page_header.php';
 
@@ -37,7 +43,8 @@ $fields = array(
 	'from' =>			array(T_ZBX_INT, O_OPT, null,	'{}>=0',	null),
 	'width' =>			array(T_ZBX_INT, O_OPT, null,	'{}>0',		null),
 	'height' =>			array(T_ZBX_INT, O_OPT, null,	'{}>0',		null),
-	'border' =>			array(T_ZBX_INT, O_OPT, null,	IN('0,1'),	null)
+	'border' =>			array(T_ZBX_INT, O_OPT, null,	IN('0,1'),	null),
+	'd3' =>				array(T_ZBX_INT, O_OPT, null,	IN('0,1'),	null)
 );
 check_fields($fields);
 
@@ -80,6 +87,15 @@ if (isset($_REQUEST['border'])) {
 	$graph->setBorder(0);
 }
 $graph->addItem($_REQUEST['itemid'], GRAPH_YAXIS_SIDE_DEFAULT, CALC_FNC_ALL);
-$graph->draw();
+
+if(GRAPH_ENGINE_D3 === true){
+	//var_dump(CJs::encodeJson($graph));
+	//print_r($graph->draw());
+	$graphData = $graph->draw();
+	//print_r($graphData);
+}
+else{
+	$graph->draw();
+}
 
 require_once dirname(__FILE__).'/include/page_footer.php';

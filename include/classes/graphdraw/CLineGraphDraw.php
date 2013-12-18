@@ -2262,7 +2262,9 @@ class CLineGraphDraw extends CGraphDraw {
 	public function draw() {
 		$start_time = microtime(true);
 
-		set_image_header();
+		if(GRAPH_ENGINE_D3 === false){
+			set_image_header();
+		}
 
 		$this->selectData();
 
@@ -2482,8 +2484,12 @@ class CLineGraphDraw extends CGraphDraw {
 		$strSize = imageTextSize(6, 0, $str);
 		imageText($this->im, 6, 0, $this->fullSizeX - $strSize['width'] - 5, $this->fullSizeY - 5, $this->getColor('Gray'), $str);
 
-		unset($this->items, $this->data);
-
-		imageOut($this->im);
+		if(GRAPH_ENGINE_D3 === true){
+			return get_object_vars($this);
+		}
+		else{
+			unset($this->items, $this->data);
+			imageOut($this->im);
+		}
 	}
 }

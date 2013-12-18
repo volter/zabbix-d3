@@ -81,6 +81,7 @@ $availableJScripts = array(
 	'class.rpc.js' => '',
 	'class.pmaster.js' => '',
 	'class.cviewswitcher.js' => '',
+	'class.graphd3.js' => '',
 	'init.js' => '',
 	// templates
 	'sysmap.tpl.js' => 'templates/'
