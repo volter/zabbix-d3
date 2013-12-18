@@ -1368,6 +1368,43 @@ function separateMapElements($sysmap) {
 	return $elements;
 }
 
+/**
+ * Transform node and link data to a form useful for D3
+ *
+ * @param array $map	Raw API map array
+ *
+ * @return array	Transformed nodes and links
+ */
+function prepareMapData($map) {
+	#TODO: Check whether nodes and links exist on the map
+	// D3's forced layouts use the internal, 0-based index for referencing links
+	// Therefore map selementid to a map-specific new index
+	$index = 0;
+	foreach ($map['selements'] as $selement) {
+		$label = resolveMapLabelMacrosAll($selement);
+		$nodes[] = array(
+			'x' => $selement['x'],
+			'y' => $selement['y'],
+			'label' => $label,
+			'label_location' => $selement['label_location'],
+			'elementtype' => $selement['elementtype'],
+			'iconid_off' => $selement['iconid_off'],
+			'iconid_on' => $selement['iconid_on'],
+			'fixed' => true
+		);
+		$mapping[$selement['selementid']] = $index;
+		$index++;
+	}
+	foreach ($map['links'] as $link) {
+		$links[] = array(
+			'source' => $mapping[$link['selementid1']],
+			'target' => $mapping[$link['selementid2']],
+			'color' => $link['color']
+		);
+	}
+	return array($nodes, $links);
+}
+
 function drawMapConnectors(&$im, $map, $mapInfo, $drawAll = false) {
 	$selements = $map['selements'];
 
@@ -1787,7 +1824,7 @@ function drawMapLinkLabels(&$im, $map, $mapInfo, $resolveMacros = true) {
 	}
 }
 
-function drawMapLabels(&$im, $map, $mapInfo, $resolveMacros = true) {
+function mapLabels($map, $mapInfo, $resolveMacros = true) {
 	global $colors;
 
 	if ($map['label_type'] == MAP_LABEL_TYPE_NOTHING && $map['label_format'] == SYSMAP_LABEL_ADVANCED_OFF) {
@@ -2017,6 +2054,7 @@ function drawMapLabels(&$im, $map, $mapInfo, $resolveMacros = true) {
 			}
 
 			$str = str_replace("\r", '', $line['msg']);
+            #TODO: Improve structure of returned data and solve the newline issue
 			$color = isset($line['color']) ? $line['color'] : $colors['Black'];
 
 			$dims = imageTextSize(8, 0, $str);
@@ -2031,17 +2069,12 @@ function drawMapLabels(&$im, $map, $mapInfo, $resolveMacros = true) {
 				$x_label = $x_rec;
 			}
 
-			imagefilledrectangle(
-				$im,
-				$x_label - 1, $y_rec + $increasey - $labelFontHeight + $labelFontBaseline,
-				$x_label + $dims['width'] + 1, $y_rec + $increasey + $labelFontBaseline,
-				$colors['White']
-			);
-			imagetext($im, 8, 0, $x_label, $y_rec + $increasey, $color, $str);
 
 			$increasey += $labelFontHeight + 1;
 		}
+    $labels[] = $label;
 	}
+return $labels;
 }
 
 /**

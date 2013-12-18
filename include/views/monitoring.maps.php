@@ -56,12 +56,19 @@ if (!empty($this->data['maps'])) {
 	}
 
 	$actionMap = getActionMapBySysmap($this->data['map'], array('severity_min' => $this->data['severity_min']));
+	$mapTable->addRow('',null,'svg-container');
 
-	$mapTable->addRow($actionMap);
+	$mapInfo = getSelementsInfo($this->data['map'], array('severity_min' => get_request('severity_min')));
+	#TODO
+	//$map['selements'] = zbx_toHash($map['selements'], 'selementid');
+	$this->data['mapLabels'] = mapLabels($this->data['map'], $mapInfo);
+	list($this->data['nodes'], $this->data['links']) = prepareMapData($this->data['map']);
 
-	$imgMap = new CImg('map.php?sysmapid='.$this->data['sysmapid'].'&severity_min='.$this->data['severity_min']);
-	$imgMap->setMap($actionMap->getName());
-	$mapTable->addRow($imgMap);
+	//$imgMap->setMap($actionMap->getName());
+	//$areas = populateFromMapAreas($map);
+	//$mapInfo = getSelementsInfo($map, array('severity_min' => get_request('severity_min')));
+	//TODO: Icon mapping
+	//
 
 	$icon = get_icon('favourite', array(
 		'fav' => 'web.favorite.sysmapids',
@@ -69,6 +76,8 @@ if (!empty($this->data['maps'])) {
 		'elid' => $this->data['sysmapid']
 	));
 	$fsIcon = get_icon('fullscreen', array('fullscreen' => $this->data['fullscreen']));
+
+require_once dirname(__FILE__).'/js/monitoring.maps.js.php';
 }
 
 $mapWidget->addItem($mapTable);

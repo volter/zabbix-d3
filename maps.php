@@ -26,6 +26,7 @@ $page['title'] = _('Network maps');
 $page['file'] = 'maps.php';
 $page['hist_arg'] = array('sysmapid');
 $page['type'] = detect_page_type(PAGE_TYPE_HTML);
+$page['scripts'] = array('d3.js');
 
 if ($page['type'] == PAGE_TYPE_HTML) {
 	define('ZBX_PAGE_DO_REFRESH', 1);
