@@ -2483,9 +2483,13 @@ class CLineGraphDraw extends CGraphDraw {
 		$str = _s('Data from %1$s. Generated in %2$s sec.', $this->dataFrom, $str);
 		$strSize = imageTextSize(6, 0, $str);
 		imageText($this->im, 6, 0, $this->fullSizeX - $strSize['width'] - 5, $this->fullSizeY - 5, $this->getColor('Gray'), $str);
-
+		
 		if(GRAPH_ENGINE_D3 === true){
-			return get_object_vars($this);
+			$json = new CJSON;
+			unset($this->im);
+			$graphData = $json->encode(get_object_vars($this));
+			unset($this->items, $this->data);
+			return $graphData;
 		}
 		else{
 			unset($this->items, $this->data);

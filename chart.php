@@ -23,8 +23,8 @@ require_once dirname(__FILE__).'/include/config.inc.php';
 $page['file'] = 'chart.php';
 
 if(GRAPH_ENGINE_D3 === true){
-	$page['type'] = PAGE_TYPE_HTML;
-	$page['scripts'] = array('class.graphd3.js', 'd3.js');
+	$page['type'] = PAGE_TYPE_JSON;
+	$page['scripts'] = array('d3.js');
 }
 else{
 	$page['type'] = PAGE_TYPE_IMAGE;
@@ -89,10 +89,8 @@ if (isset($_REQUEST['border'])) {
 $graph->addItem($_REQUEST['itemid'], GRAPH_YAXIS_SIDE_DEFAULT, CALC_FNC_ALL);
 
 if(GRAPH_ENGINE_D3 === true){
-	//var_dump(CJs::encodeJson($graph));
-	//print_r($graph->draw());
 	$graphData = $graph->draw();
-	//print_r($graphData);
+	print_r($graphData);
 }
 else{
 	$graph->draw();
