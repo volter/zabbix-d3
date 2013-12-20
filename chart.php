@@ -21,14 +21,7 @@
 require_once dirname(__FILE__).'/include/config.inc.php';
 
 $page['file'] = 'chart.php';
-
-if(GRAPH_ENGINE_D3 === true){
-	$page['type'] = PAGE_TYPE_JSON;
-	$page['scripts'] = array('d3.js');
-}
-else{
-	$page['type'] = PAGE_TYPE_IMAGE;
-}
+$page['type'] = PAGE_TYPE_IMAGE;
 
 require_once dirname(__FILE__).'/include/page_header.php';
 
@@ -43,8 +36,7 @@ $fields = array(
 	'from' =>			array(T_ZBX_INT, O_OPT, null,	'{}>=0',	null),
 	'width' =>			array(T_ZBX_INT, O_OPT, null,	'{}>0',		null),
 	'height' =>			array(T_ZBX_INT, O_OPT, null,	'{}>0',		null),
-	'border' =>			array(T_ZBX_INT, O_OPT, null,	IN('0,1'),	null),
-	'd3' =>				array(T_ZBX_INT, O_OPT, null,	IN('0,1'),	null)
+	'border' =>			array(T_ZBX_INT, O_OPT, null,	IN('0,1'),	null)
 );
 check_fields($fields);
 
@@ -87,13 +79,6 @@ if (isset($_REQUEST['border'])) {
 	$graph->setBorder(0);
 }
 $graph->addItem($_REQUEST['itemid'], GRAPH_YAXIS_SIDE_DEFAULT, CALC_FNC_ALL);
-
-if(GRAPH_ENGINE_D3 === true){
-	$graphData = $graph->draw();
-	print_r($graphData);
-}
-else{
-	$graph->draw();
-}
+$graph->draw();
 
 require_once dirname(__FILE__).'/include/page_footer.php';

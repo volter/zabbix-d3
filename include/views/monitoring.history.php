@@ -183,7 +183,7 @@ else {
 
 	$historyTable = new CTable(null, 'maxwidth');
 	$historyTable->addRow($screen->get());
-
+	
 	$historyWidget->addItem($historyTable);
 
 	if ($this->data['action'] == 'showvalues' || $this->data['action'] == 'showgraph') {

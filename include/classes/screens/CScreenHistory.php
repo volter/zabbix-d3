@@ -306,12 +306,18 @@ class CScreenHistory extends CScreenBase {
 			$this->dataId = 'historyGraph';
 			$containerId = 'graph_cont1';
 			$src = 'chart.php?itemid='.$this->item['itemid'].'&period='.$this->timeline['period'].'&stime='.$this->timeline['stime'].$this->getProfileUrlParams();
-
-			$output[] = new CDiv(null, 'center', $containerId);
+			
+			if(GRAPH_ENGINE_D3 === true){
+				$src = 'js/chart.js?itemid='.$this->item['itemid'].'&period='.$this->timeline['period'].'&stime='.$this->timeline['stime'].$this->getProfileUrlParams();
+				$output[] = new CDiv(new CJSscript('<script src='.$src.'></script>'), 'center', $containerId);
+			}
+			else{
+				$output[] = new CDiv(null, 'center', $containerId);
+			}
 		}
-
+		
 		// time control
-		if (!$this->plaintext && str_in_array($this->action, array('showvalues', 'showgraph'))) {
+		if (!$this->plaintext && str_in_array($this->action, array('showvalues'))) {
 			$graphDims = getGraphDims();
 
 			$this->timeline['starttime'] = date(TIMESTAMP_FORMAT, get_min_itemclock_by_itemid($this->item['itemid']));
