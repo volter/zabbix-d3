@@ -308,8 +308,14 @@ class CScreenHistory extends CScreenBase {
 			$src = 'chart.php?itemid='.$this->item['itemid'].'&period='.$this->timeline['period'].'&stime='.$this->timeline['stime'].$this->getProfileUrlParams();
 			
 			if(GRAPH_ENGINE_D3 === true){
-				$src = 'js/chart.js?itemid='.$this->item['itemid'].'&period='.$this->timeline['period'].'&stime='.$this->timeline['stime'].$this->getProfileUrlParams();
-				$output[] = new CDiv(new CJSscript('<script src='.$src.'></script>'), 'center', $containerId);
+				$graph = new CLineGraphDraw();
+				$graph->setPeriod($this->timeline['period']);
+				$graph->setSTime($this->timeline['stime']);
+				$graph->addItem($this->item['itemid'], GRAPH_YAXIS_SIDE_DEFAULT, CALC_FNC_ALL);
+				$graphData = $graph->draw();
+				insert_js('var graphData = '.$graphData);
+				$src = 'js/chart.js';
+				$output[] = new CDiv(new CJSscript('<script src=js/chart.js></script>'), 'center', $containerId);
 			}
 			else{
 				$output[] = new CDiv(null, 'center', $containerId);

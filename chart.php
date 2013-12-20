@@ -18,10 +18,18 @@
 ** Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 **/
 
+	
 require_once dirname(__FILE__).'/include/config.inc.php';
 
 $page['file'] = 'chart.php';
-$page['type'] = PAGE_TYPE_IMAGE;
+
+if(GRAPH_ENGINE_D3 === true){
+	$page['type'] = PAGE_TYPE_JSON;
+}
+else{
+	$page['type'] = PAGE_TYPE_IMAGE;
+}
+
 
 require_once dirname(__FILE__).'/include/page_header.php';
 
@@ -79,6 +87,12 @@ if (isset($_REQUEST['border'])) {
 	$graph->setBorder(0);
 }
 $graph->addItem($_REQUEST['itemid'], GRAPH_YAXIS_SIDE_DEFAULT, CALC_FNC_ALL);
-$graph->draw();
+
+if(GRAPH_ENGINE_D3 === true){
+	echo $graph->draw();
+}
+else{
+	$graph->draw();
+}
 
 require_once dirname(__FILE__).'/include/page_footer.php';
