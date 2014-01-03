@@ -94,6 +94,9 @@ function getActionMapBySysmapD3($sysmap, array $options = array()) {
 	));
 
 	foreach ($sysmap['selements'] as $elem) {
+		$hostId = null;
+		$scripts = null;
+		$gotos = null;
 		switch ($elem['elementtype']) {
 			case SYSMAP_ELEMENT_TYPE_HOST:
 				$host = $hosts[$elem['elementid']];

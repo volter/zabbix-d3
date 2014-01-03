@@ -114,9 +114,6 @@
             }
 		}
 
-        var n = 2;
-        var duration = 10;
-
 		function click() {
 				var data = this.__data__.menu;
 				switch (data.type) {
