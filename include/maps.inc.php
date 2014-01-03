@@ -61,6 +61,95 @@ function sysmapElementLabel($label = null) {
 	}
 }
 
+function getActionMapBySysmapD3($sysmap, array $options = array()) {
+	$mapInfo = getSelementsInfo($sysmap, $options);
+
+	$hostIds = array();
+	foreach ($sysmap['selements'] as $id => &$selement) {
+		if ($selement['elementtype'] == SYSMAP_ELEMENT_TYPE_HOST) {
+			$hostIds[$selement['elementid']] = $selement['elementid'];
+
+			// expanding hosts url macros again as some hosts were added from hostgroup areeas
+			// and automatic expanding only happens for elements that are defined for map in db
+			foreach ($selement['urls'] as $urlId => $url) {
+				$selement['urls'][$urlId]['url'] = str_replace('{HOST.ID}', $selement['elementid'], $url['url']);
+			}
+		}
+
+		if ($selement['elementsubtype'] == SYSMAP_ELEMENT_SUBTYPE_HOST_GROUP_ELEMENTS) {
+			unset($sysmap['selements'][$id]);
+		}
+	}
+	unset($selement);
+
+	$hostScripts = API::Script()->getScriptsByHosts($hostIds);
+
+	$hosts = API::Host()->get(array(
+		'nodeids' => get_current_nodeid(true),
+		'hostids' => $hostIds,
+		'output' => array('status'),
+		'nopermissions' => true,
+		'preservekeys' => true,
+		'selectScreens' => API_OUTPUT_COUNT
+	));
+
+	foreach ($sysmap['selements'] as $elem) {
+		switch ($elem['elementtype']) {
+			case SYSMAP_ELEMENT_TYPE_HOST:
+				$host = $hosts[$elem['elementid']];
+
+				if ($hostScripts[$elem['elementid']]) {
+					$hostId = $elem['elementid'];
+					$scripts = $hostScripts[$elem['elementid']];
+				}
+				if ($hosts[$elem['elementid']]['status'] == HOST_STATUS_MONITORED) {
+					$gotos['triggerStatus'] = array(
+						'hostid' => $elem['elementid'],
+						'show_severity' => isset($options['severity_min']) ? $options['severity_min'] : null
+					);
+				}
+				if ($host['screens']) {
+					$gotos['screens'] = array(
+						'hostid' => $host['hostid']
+					);
+				}
+				$gotos['inventory'] = array(
+					'hostid' => $host['hostid']
+				);
+				break;
+
+			case SYSMAP_ELEMENT_TYPE_MAP:
+				$gotos['submap'] = array(
+					'sysmapid' => $elem['elementid'],
+					'severity_min' => isset($options['severity_min']) ? $options['severity_min'] : null
+				);
+				break;
+
+			case SYSMAP_ELEMENT_TYPE_TRIGGER:
+				$gotos['events'] = array(
+					'triggerid' => $elem['elementid'],
+					'nav_time' => time() - SEC_PER_WEEK
+				);
+				break;
+
+			case SYSMAP_ELEMENT_TYPE_HOST_GROUP:
+				$gotos['triggerStatus'] = array(
+					'groupid' => $elem['elementid'],
+					'hostid' => 0,
+					'show_severity' => isset($options['severity_min']) ? $options['severity_min'] : null
+				);
+				break;
+		}
+
+		order_result($elem['urls'], 'name');
+		$popup = getMenuPopupMap($hostId, $scripts, $gotos, $elem['urls']);
+
+		$popups[$elem['elementid']] = $popup;
+	}
+
+	return $popups;
+}
+
 /**
  * Create map area with submenu for sysmap elements.
  * In submenu gathered information about urls, scripts and submaps.
@@ -1376,31 +1465,49 @@ function separateMapElements($sysmap) {
  * @return array	Transformed nodes and links
  */
 function prepareMapData($map) {
-	#TODO: Check whether nodes and links exist on the map
 	// D3's forced layouts use the internal, 0-based index for referencing links
 	// Therefore map selementid to a map-specific new index
+    $mapInfo = getSelementsInfo($map);
+    $menus = getActionMapBySysmapD3($map);
+
 	$index = 0;
-	foreach ($map['selements'] as $selement) {
-		$label = resolveMapLabelMacrosAll($selement);
-		$nodes[] = array(
-			'x' => $selement['x'],
-			'y' => $selement['y'],
-			'label' => $label,
-			'label_location' => $selement['label_location'],
-			'elementtype' => $selement['elementtype'],
-			'iconid_off' => $selement['iconid_off'],
-			'iconid_on' => $selement['iconid_on'],
-			'fixed' => true
-		);
-		$mapping[$selement['selementid']] = $index;
-		$index++;
+	// If a map has no elements, it has no links either
+	if (!empty($map['selements'])) {
+		foreach ($map['selements'] as $selement) {
+			$label = resolveMapLabelMacrosAll($selement);
+			$nodes[] = array(
+				'x' => $selement['x'],
+				'y' => $selement['y'],
+				'label' => $label,
+				'menu' => $menus[$selement['elementid']],
+				'label_location' => $selement['label_location'],
+				'elementtype' => $selement['elementtype'],
+				'iconid_off' => $selement['iconid_off'],
+				'iconid_on' => $selement['iconid_on'],
+                'info' => $mapInfo[$selement['selementid']],
+				'fixed' => true
+			);
+			$mapping[$selement['selementid']] = $index;
+			$index++;
+		}
 	}
-	foreach ($map['links'] as $link) {
-		$links[] = array(
-			'source' => $mapping[$link['selementid1']],
-			'target' => $mapping[$link['selementid2']],
-			'color' => $link['color']
-		);
+	else {
+		return array(array(),array());
+	}
+	// Not all maps have links
+	if (!empty($map['links'])) {
+		foreach ($map['links'] as $link) {
+			$links[] = array(
+				'source' => $mapping[$link['selementid1']],
+				'target' => $mapping[$link['selementid2']],
+				'label' => $link['label'],
+				'drawtype' => $link['drawtype'],
+				'color' => $link['color']
+			);
+		}
+	}
+	else {
+		$links = array();
 	}
 	return array($nodes, $links);
 }

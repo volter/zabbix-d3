@@ -565,3 +565,11 @@ table.suggest tr td { text-align: left; padding-left: 4px; line-height: 2.2em; f
 
 /* tabs */
 .tabs { visibility: hidden; }
+
+/* D3 maps */
+line.link.normal { stroke-width: 1; }
+line.link.bold { stroke-width: 3; }
+line.link.dot { stroke-width: 2; stroke-linecap: round; stroke-dasharray: 0.1,8; }
+line.link.dashed { stroke-dasharray: 5,5; }
+
+text.shadow { stroke: white; stroke-width: 4px; opacity: 0.9; }
